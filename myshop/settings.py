@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import django_heroku
+import dj_database_url
+from decouple import config,Csv
+from django.conf import settings
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -22,30 +26,37 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '97vqo*t)m)h_3pjjw4(=9m&kc*-_a*30icly_ifg$80jeg_cbz'
 
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
 
-import django
-django.setup()
 
+# import django
+# django.setup()
 
 # Application definition
 
 INSTALLED_APPS = (
+    
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_celery_results',
     'shop',
     'cart',
     'orders',
     'payment',
     'paypal.standard.ipn',
 )
+
+import django
+django.setup()
+
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -56,6 +67,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    
 )
 
 ROOT_URLCONF = 'myshop.urls'
@@ -83,12 +96,45 @@ WSGI_APPLICATION = 'myshop.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
+# DATABASES = {
+#     'default': {
+#     'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#     'NAME': 'investory',
+#     'USER': 'postgres',
+#     'PASSWORD': 111,
+#     'HOST': 'localhost',
+#     'PORT': '',
+#     }
+# }
+
+
+# development
+if config('MODE')=="dev":
+   DATABASES = {
+            'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'investory',
+            'USER': 'postgres',
+            'PASSWORD': 111,
+            'HOST': 'localhost',
+            'PORT': '',
+            }
+
+   }
+# production
+else:
+   DATABASES = {
+       'default': dj_database_url.config(
+           default=config('DATABASE_URL')
+       )
+
+   }
+
+db_from_env = dj_database_url.config(conn_max_age=500)
+DATABASES['default'].update(db_from_env)
+
+ALLOWED_HOSTS = config('ALLOWED_HOSTS',cast=Csv())
+
 
 
 # Internationalization
@@ -103,7 +149,8 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
+#whitenoise
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
@@ -119,3 +166,6 @@ CART_SESSION_ID = 'cart'
 # django-paypal settings
 PAYPAL_RECEIVER_EMAIL = ''
 PAYPAL_TEST = True
+
+# Configure Django App for Heroku.
+django_heroku.settings(locals())
