@@ -1,4 +1,5 @@
-#!/home/xystus/Documents/myshop/virtual/bin/python
+#!/home/xystus/Documents/myshop/virtual/bin/python3.6
+
 # -*- coding: utf-8 -*-
 import re
 import sys
