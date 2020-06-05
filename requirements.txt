@@ -4,7 +4,7 @@ astroid==2.2.5
 billiard==3.3.0.23
 celery==3.1.26.post2
 dj-database-url==0.5.0
-Django==1.11
+Django==1.11.29
 django-bootstrap3==11.1.0
 django-celery==3.3.1
 isort==4.3.21
